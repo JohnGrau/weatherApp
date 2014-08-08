@@ -1,310 +1,105 @@
-<!Doctype>
+<!DOCTYPE html>
 <html>
-<head>
-	<meta charset="utf-8">
-	<meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0, user-scalable=no" />
-	<title>weather</title>
-	<link rel="stylesheet/less" type="text/css" href="css/app.css"/>
-	<script src="js/less.js" type="text/javascript"></script>
-</head>
-<body>
-	<header class="header">
-			<div class="leftBtn">
-				<a id="nav-toggle" href="#"><span></span></a>
-			</div>
-			Buenos Aires
-	</header>
-	<section class="view">
-		<div class="grid">
-			<div class="col-1-1">
-				<div class="content">
-						<h3 style="color:#fff;text-align:center" id="date"></h3>
-					</div>
-			</div>
-		</div>
-		<div class="wrap">
-  <form class="weather group">
-    <input type="text" class="location" placeholder="Escribe tu ciudad"/><button>Comprobar</button>
-
-  </form>
-   <div class="weather-result group">
-      <div class="loading">
-        <p class="message"></p>
-        <span class="loader"></span>
-     </div>
-
-      <div class="content">
-        <div class="icon"></div>
-        <h1 class="title"></h1>
-        <p class="name"></p>
-        <p class="temp" data-far=""></p>
-
-        <p class="description"></p>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <title>My App</title>
+    <link rel="stylesheet" href="css/framework7.css">
+    <link rel="stylesheet" href="css/my-app.css">
+  </head>
+  <body>
+    <!-- Status bar overlay for fullscreen mode-->
+    <div class="statusbar-overlay"></div>
+    <!-- Panels overlay-->
+    <div class="panel-overlay"></div>
+    <!-- Left panel with reveal effect-->
+    <div class="panel panel-left panel-reveal">
+      <div class="content-block">
+        <ul class="navigation">
+          <li class="nav-item"><a href="#">Pronosticos</a></li>
+          <li class="nav-item"><a href="location.html">Buscar</a></li>
+          <li class="nav-item"><a href="map.html">Mapa</a></li>
+        </ul>
       </div>
-
     </div>
-</div>
-	</section>
-
-	<script>document.querySelector( "#nav-toggle" )
-  .addEventListener( "click", function() {
-    this.classList.toggle( "active" );
-  });//@ sourceURL=pen.js
-</script>
-<script src='//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js'></script>
-<script src='https://s3-us-west-2.amazonaws.com/s.cdpn.io/74196/jquery.velocity.min.js'></script>
-<script>
-(function($, window){
-
-  var weather = {
-    init: function(){
-      this.form = $(".weather");
-      this.loc = $(".location");
-      this.icon = $(".icon");
-      this.temp = $(".temp");
-      this.city = $(".name");
-      this.weather = $(".title");
-      this.desc = $(".description");
-      this.message = $(".message");
-      this.loader = $(".loader");
-      this.loadingBox = $(".loading");
-      this.currentCity = null;
-      // maps api weather codes to icon font
-      this.icons = {
-        "01d": "B",
-        "01n": "C",
-
-        "02d": "H",
-        "02n": "I",
-
-        "03d": "N",
-        "03n": "N",
-
-        "04d": "Y",
-        "04n": "Y",
-
-        "09d": "Q",
-        "09n": "Q",
-
-        "10d": "R",
-        "10n": "R",
-
-        "11d": "0",
-        "11n": "0",
-
-        "13d": "W",
-        "13n": "W",
-
-        "50d": "J",
-        "50n": "K",
-      };
-      this.binding();
-    },
-
-    binding: function(){
-      this.form.on("submit", $.proxy(this.formSubmit, this));
-    },
-
-    formSubmit: function(e){
-      if(this.loc.val() && this.loc.val() !== this.currentCity){
-        this.getWeather(this.loc.val());
-      } else if(this.loc.val() == this.currentCity){
-        $(".content").velocity({
-          translateX: [-3, 3, 0],
-          translate3d: 0
-        }, {
-          duration: 50,
-          loop: 2
-        });
-      }
-      e.preventDefault();
-    },
-
-    getWeather: function(loc){
-      var city = encodeURIComponent(loc);
-      this.currentCity = loc;
-      this.loading();
-      $.ajax({
-        url: "http://api.openweathermap.org/data/2.5/weather?units=metric&q=" + city+'&lang=sp',
-        dataType: "json",
-        success: $.proxy(this.showWeather, this)
-      });
-    },
-
-    weatherData: function(data){
-      if(data.name){
-        return {
-          name: data.name,
-          lat: data.coord.lat,
-          lon: data.coord.lon,
-          weather: data.weather[0].main,
-          weatherDesc: data.weather[0].description,
-          temp: Math.round(data.main.temp),
-          tempMax: data.main.temp_max,
-          tempMin: data.main.temp_min,
-          humidity: data.main.humidity,
-          iconMap: data.weather[0].icon,
-          wind: {
-            deg: data.wind.deg,
-            speed: data.wind.speed
-          }
-        }
-      } else {
-        return false;
-      }
-    },
-
-    showWeather: function(data){
-     var w = this.weatherData(data);
-     if(w){
-       this.icon.html(this.icons[w.iconMap]);
-       this.city.html(w.name);
-       this.temp.html(w.temp);
-       this.temp.attr("data-far", "+");
-       this.desc.html(w.weatherDesc);
-       this.weather.html(w.weather);
-       this.weatherChange();
-     } else {
-       this.cityNotFound();
-     }
-    },
-
-    clearAll: function(){
-      var els = ["temp", "city", "desc", "weather", "icon"];
-      var i;
-      for(i=0;i<els.length;i++){
-        var s = els[i];
-        this[s].velocity("stop");
-        this[s].velocity({
-          opacity: 0,
-          translateY: [0, -50]
-        },{
-          display: "none",
-          duration: 200
-        });
-      }
-    },
-
-    loading: function(){
-      this.clearAll();
-      this.message.html("Comprobando...");
-      this.message.velocity({
-        translateY: [20, 0],
-        opacity: 1
-      }, {
-        display: "block",
-        duration: 1000
-      });
-
-      this.loader.velocity({
-        translateY: [40, 10],
-        translateX: [0, 1000],
-        opacity: 1,
-      }, {
-        display: "inline-block",
-        duration: 750
-      }).velocity({
-        rotateZ: [-540, 0],
-        easing: "linear"
-      }, {
-        loop: 10,
-        delay: 250,
-        duration: 3000
-      });
-    },
-
-    cityNotFound: function(){
-      this.message.html("Ingrese una ciudad correcta.");
-      this.loader.velocity("stop");
-      this.loader.velocity({
-        opacity: 0,
-        translateX: 1000
-      }, {
-        duration: 1000,
-        display: "none"
-      })
-    },
-
-    weatherChange: function(){
-     this.message.velocity({
-       translateY: 0,
-       opacity: 0,
-     }, {
-       display: "none",
-       duration: 200,
-     });
-     this.loader.velocity("stop");
-     this.loader.velocity({
-       translateY: 0,
-       opacity: 0
-      }, {
-        display: "none",
-        delay: 100,
-        duration: 200,
-        complete: function(){
-          var w = weather;
-          w.icon.velocity({
-            opacity: 1,
-            translateX: [0, 25],
-
-          }, {
-            display: "block",
-            duration: 600,
-
-          });
-          w.city.velocity({
-            opacity: [1, 0],
-            translateX: [0, 300]
-
-          }, {
-            duration: 800,
-            display: "block"
-          });
-          w.weather.velocity({
-            opacity: [1,0],
-            translateY: [0, 100]
-          }, {
-            duration: 600,
-            display: "block"
-          });
-
-          w.desc.velocity({
-            opacity: [1, 0],
-            translateX: [0, -100]
-          }, {
-            duration: 600,
-            delay: 600,
-            display: "block"
-          });
-
-          w.temp.velocity({
-            opacity: 1,
-            translateY: [0, -20]
-          }, {
-            display: "inline-block",
-            duration: 600,
-            delay: 400
-          });
-        }
-      });
-
-    },
-
-
-  }; // end weather {}
-
-
-  weather.init();
-
-})(jQuery, window);
-</script>
-<script type="text/javascript">
-    var meses = new Array ("Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre");
-var diasSemana = new Array("Domingo","Lunes","Martes","Miércoles","Jueves","Viernes","Sábado");
-var f=new Date();
-var fecha = diasSemana[f.getDay()] + " " + f.getDate() + " de " + meses[f.getMonth()];
-    
-    document.getElementById('date').innerHTML = fecha;
-  </script>
-</body>
+    <!-- Views-->
+    <div class="views">
+      <!-- Your main view, should have "view-main" class-->
+      <div class="view view-main">
+        <!-- Top Navbar-->
+        <div class="navbar">
+          <div class="navbar-inner">
+            <div class="left">
+            <a href="#" class="link icon-only open-panel">
+              <svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+              width="32px" height="32px" viewBox="0 0 64 64" enable-background="new 0 0 64 64" xml:space="preserve">
+              <g>
+              <g>
+              <rect x="4" y="11.491" width="56" height="4.801"/>
+              </g>
+              <g>
+              <rect x="4" y="29.453" width="56" height="4.801"/>
+              </g>
+              <g>
+              <rect x="4" y="47.707" width="56" height="4.803"/>
+              </g>
+              </g>
+              </svg>
+            </a>
+            </div>
+            <div class="center sliding">Mi ubicación</div>
+            <div class="right">
+            <a href="#" class="refresh-click link" onclick="reloadWeather();">
+              <svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+              width="32px" height="32px" viewBox="0 0 64 64" enable-background="new 0 0 64 64" xml:space="preserve">
+              <g>
+              <path fill="#231F20" d="M56.228,33.909c-0.092,6.338-2.611,12.296-7.096,16.78c-9.449,9.449-24.824,9.449-34.273,0
+              c-9.449-9.45-9.449-24.827,0-34.276c8.963-8.96,23.25-9.424,32.762-1.389l-8.575,2.206l0.437,2.109l12.371-2.933l-0.062-0.06
+              l0.05-0.014l-2.409-12.26l-2.083,0.546l1.756,8.851c-10.355-8.837-25.979-8.367-35.77,1.42c-10.288,10.29-10.288,27.032,0,37.321
+              c10.291,10.29,27.03,10.29,37.321,0c4.881-4.881,7.623-11.37,7.724-18.271L56.228,33.909z"/>
+              </g>
+              </svg>
+            </a>
+            </div>
+          </div>
+        </div>
+        <!-- Pages, because we need fixed-through navbar and toolbar, it has additional appropriate classes-->
+        <div class="pages navbar-through toolbar-through">
+          <!-- Page, data-page contains page name-->
+          <div data-page="index" class="page">
+            <!-- Scrollable page content-->
+            <div class="page-content">
+              <div class="content-block">
+                <div class="row">
+                  <div class="col-80" style="margin-left:35px;text-align:center;color:#fff;font-family:Arial">
+                    <h3 id="ciudad"></h3>
+                  </div>                  
+                </div>
+              </div>
+              
+              <div class="content-block">
+                <div class="row" style="margin:0 auto;">
+                  <div class="col-50" style="position:absolute;left:12px;text-align:center;">
+                    <div id="icon"></div>
+                  </div>
+                  <div class="col-50" style="position:absolute;right:-10px;text-align:left;color:#fff;">
+                    <h1 id="tiempo"></h1>
+                  </div>
+                </div>
+                <div class="row" style="margin-top:140px">
+                  <div class="col-90" style="text-align:center;">
+                  <h3 style="font-family:Roboto;color:#fff" id="clima"></h3>
+                  </div>                  
+                </div>
+              </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script src='js/jquery.min.js'></script>
+    <script type="text/javascript" src="js/framework7.js"></script>
+    <script type="text/javascript" src="js/my-app.js"></script>
+  </body>
 </html>
